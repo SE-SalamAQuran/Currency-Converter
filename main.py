@@ -1,5 +1,8 @@
 # # Python Project on Currency Converter
+from dotenv import load_dotenv
 
+load_dotenv()
+import os
 import requests
 from tkinter import *
 import tkinter as tk
@@ -10,8 +13,10 @@ from ttkthemes import ThemedTk
 
 
 class RealTimeCurrencyConverter:
-    def __init__(self, url):
-        self.data = requests.get(url).json()
+    def __init__(self):
+        accesskey = os.getenv("MY_API_KEY")
+        self.url = str.__add__("http://data.fixer.io/api/latest?access_key=", accesskey)
+        self.data = requests.get(self.url).json()
         self.currencies = self.data["rates"]
 
     def convert(self, from_currency, to_currency, amount):
@@ -26,10 +31,11 @@ class RealTimeCurrencyConverter:
 
 class App(ThemedTk):
     def __init__(self, converter):
-        super().__init__("equilux")
+        super().__init__("clam")
         self.title = "Currency Converter"
         self.currency_converter = converter
         style = ttk.Style(self)
+        style.theme_use("clam")
         style.configure("TLabel", background="white")
 
         self.geometry("500x200")
@@ -44,16 +50,15 @@ class App(ThemedTk):
         )
         self.intro_label.config(font=("Courier", 15, "bold"))
 
-        self.date_label = Label(
+        self.date_label1 = Label(
             self,
-            text=f"1 US Dollars equals = {self.currency_converter.convert('USD','ILS',1)} ILS \n Date : {self.currency_converter.data['date']}",
+            text=f"1 US Dollars equals = {self.currency_converter.convert('USD','ILS',1)} ILS \n Date: {self.currency_converter.data['date']}",
             relief=tk.GROOVE,
             borderwidth=5,
         )
 
         self.intro_label.place(x=10, y=5)
-        self.date_label.place(x=160, y=50)
-
+        self.date_label1.place(x=160, y=50)
         # Entry box
         valid = (self.register(self.restrictNumberOnly), "%d", "%P")
         self.amount_field = Entry(
@@ -132,7 +137,6 @@ class App(ThemedTk):
 
 
 if __name__ == "__main__":
-    url = "https://api.exchangerate-api.com/v4/latest/USD"
-    converter = RealTimeCurrencyConverter(url)
+    converter = RealTimeCurrencyConverter()
 
     App(converter).mainloop()
